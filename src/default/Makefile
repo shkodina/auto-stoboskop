@@ -1,11 +1,11 @@
 ###############################################################################
-# Makefile for the project strob
+# Makefile for the project strob-c
 ###############################################################################
 
 ## General Flags
-PROJECT = strob
+PROJECT = strob-c
 MCU = attiny2313
-TARGET = strob.elf
+TARGET = strob-c.elf
 CC = avr-gcc
 
 CPP = avr-g++
@@ -15,7 +15,7 @@ COMMON = -mmcu=$(MCU)
 
 ## Compile options common for all C compilation units.
 CFLAGS = $(COMMON)
-CFLAGS += -Wall -gdwarf-2  -std=gnu++0x                   -DF_CPU=1000000UL -Os -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums
+CFLAGS += -Wall -gdwarf-2 -std=gnu99 -DF_CPU=1000000UL -Os -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums
 CFLAGS += -MD -MP -MT $(*F).o -MF dep/$(@F).d 
 
 ## Assembly specific flags
@@ -25,7 +25,7 @@ ASMFLAGS += -x assembler-with-cpp -Wa,-gdwarf2
 
 ## Linker flags
 LDFLAGS = $(COMMON)
-LDFLAGS +=  -Wl,-Map=strob.map
+LDFLAGS +=  -Wl,-Map=strob-c.map
 
 
 ## Intel Hex file production flags
@@ -37,21 +37,21 @@ HEX_EEPROM_FLAGS += --change-section-lma .eeprom=0 --no-change-warnings
 
 
 ## Objects that must be built in order to link
-OBJECTS = Strob.o 
+OBJECTS = strob-c.o 
 
 ## Objects explicitly added by the user
 LINKONLYOBJECTS = 
 
 ## Build
-all: $(TARGET) strob.hex strob.eep strob.lss size
+all: $(TARGET) strob-c.hex strob-c.eep strob-c.lss size
 
 ## Compile
-Strob.o: ../Strob.cc
-	$(CPP) $(INCLUDES) $(CFLAGS) -c  $<
+strob-c.o: ../strob-c.c
+	$(CC) $(INCLUDES) $(CFLAGS) -c  $<
 
 ##Link
 $(TARGET): $(OBJECTS)
-	 $(CPP) $(LDFLAGS) $(OBJECTS) $(LINKONLYOBJECTS) $(LIBDIRS) $(LIBS) -o $(TARGET)
+	 $(CC) $(LDFLAGS) $(OBJECTS) $(LINKONLYOBJECTS) $(LIBDIRS) $(LIBS) -o $(TARGET)
 
 %.hex: $(TARGET)
 	avr-objcopy -O ihex $(HEX_FLASH_FLAGS)  $< $@
@@ -69,7 +69,7 @@ size: ${TARGET}
 ## Clean target
 .PHONY: clean
 clean:
-	-rm -rf $(OBJECTS) strob.elf dep/* strob.hex strob.eep strob.lss strob.map
+	-rm -rf $(OBJECTS) strob-c.elf dep/* strob-c.hex strob-c.eep strob-c.lss strob-c.map
 
 
 ## Other dependencies
