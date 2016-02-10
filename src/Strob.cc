@@ -1,15 +1,14 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
+
 #include "ExitDisp.h"
 
 
-/*
+
 
 class AvrExit : public ProcExit{
 #define G1EXITPORT PORTB
 #define G1END 7
-#define G2EXITPORT PORTD
-#define G2END 15
 
 	public:
 	
@@ -23,29 +22,33 @@ class AvrExit : public ProcExit{
 				return;
 			}
 			
-			if(exit_num <= G2END){ 
-				if(state){
-					UPBIT(G2EXITPORT, (exit_num - 8));
-				}else{
-					DOWNBIT(G2EXITPORT, (exit_num - 8));
-				}
-				return;
-			}
 	}
 };
 
-Tugling alwayson[] = {{Tugling::ON, Tugling::ALWAYS},{0,0}};
-Tugling alwaysoff[] = {{Tugling::OFF, Tugling::ALWAYS},{0,0}};
+#define LEFT
+
+Tugling alwayson[] = {{Tugling::ON, Tugling::ALWAYS}};
+Tugling alwaysoff[] = {{Tugling::OFF, Tugling::ALWAYS}};
+
+#ifdef LEFT
 Tugling blink_70_70[] = {{Tugling::ON, 70},{Tugling::OFF,70}};
 Tugling blink_20_50_50_20[] = {{Tugling::ON, 20}, {Tugling::OFF, 50}, {Tugling::ON, 50}, {Tugling::OFF, 20}};
 Tugling blink_20_20_20_60[] = {{Tugling::ON, 20}, {Tugling::OFF, 20}, {Tugling::ON, 20}, {Tugling::OFF, 60}};
+#endif
+
+
+#ifdef RIGHT
+Tugling blink_70_70[] = {{Tugling::ON, 70},{Tugling::OFF,70}};
+Tugling blink_20_50_50_20[] = {{Tugling::ON, 20}, {Tugling::OFF, 50}, {Tugling::ON, 50}, {Tugling::OFF, 20}};
+Tugling blink_20_20_20_60[] = {{Tugling::ON, 20}, {Tugling::OFF, 20}, {Tugling::ON, 20}, {Tugling::OFF, 60}};
+#endif
+
 
 volatile static TuggleAlgorithm strob[] = { {alwayson, 1},
 											{alwaysoff, 1},
 											{blink_70_70, 2},
 											{blink_20_50_50_20,4},
 											{blink_20_20_20_60,4} };
-*/
 
 #define ALWAYS_ON 0
 #define ALWAYS_OFF 1
@@ -57,9 +60,9 @@ volatile unsigned char strob_pos = STROB_STOP;
 #define YES_CHECK 1
 volatile char checkflag = 0;
 
-#define MAIN_SHORT_LIGHT 1
-#define MAIN_LONG_LIGHT 2
-#define MAIN_SIZE_LIGHT 3
+#define MAIN_SHORT_LIGHT 2
+#define MAIN_LONG_LIGHT 3
+#define MAIN_SIZE_LIGHT 1
 
 enum CommandResult { NO, NEXTSTROB};
 
@@ -113,48 +116,29 @@ inline CommandResult checkUserCommand(){
 	return NO;
 }
 
+inline void interruptTimerFunc(){
+	checkflag = YES_CHECK;
+}
+
 void SetupTIMER1 (void)
 {
-
+	TCCR1B = (1<<CS12);
+	TCNT1 = 65536-50;        
+	TIMSK |= (1<<TOIE1); 
 	sei();
-     TCCR1B = (1<<CS12);
-     TCNT1 = 65536-50;        
-     TIMSK |= (1<<TOIE1); 
 }
 
 
 ISR (TIMER1_OVF_vect)
 {
-
-
-//	INVBIT(PORTB,3);
-
-
+	interruptTimerFunc();
 	// run timer
-	TCNT1 = 65536 - 1000; //  31220;
+	TCNT1 = 65536 - 100; //  31220;
     TCCR1B = (1<<CS12);
     TIMSK |= (1<<TOIE1);
-
-
-}
-
-inline void interruptTimerFunc(){
-	checkflag = YES_CHECK;
 }
 							
 int main(){
-
-SetupTIMER1();
-DDRB = 0b00011111;
-
-//UPBIT(PORTB,3);
-
-	while (1) {
-		;
-	}
-
-/*
-
 	Exit main_short_light(MAIN_SHORT_LIGHT, strob[ALWAYS_ON]), // по умолчанию линии открыты, када идет питание лапм,
 	     main_long_light (MAIN_LONG_LIGHT,  strob[ALWAYS_ON]), // они сразу же работают, как при обычной эксплуатации
 		 main_size_light(MAIN_SIZE_LIGHT,  strob[ALWAYS_ON]);
@@ -193,7 +177,4 @@ DDRB = 0b00011111;
 			disp.checkExits();	
 		}
 	}
-
-*/
-
 }

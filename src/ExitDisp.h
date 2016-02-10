@@ -8,8 +8,6 @@
 #define TRUE 0xff
 #define FALSE 0x00
 
-/*
-
 struct Tugling{
 	const static char ON = 0xff;
 	const static char OFF = 0x00;
@@ -167,7 +165,6 @@ class ExitDisp{
 		return len;	
 	}
 
-
 	char changeExitByNumber(Exit ext, char number){
 		char changes = 0;
 		for(unsigned char i = 0; i < this->len; i++){
@@ -200,7 +197,5 @@ class ExitDisp{
 	ProcExit * proc_exit;
 	
 };
-
-*/
 
 #endif
